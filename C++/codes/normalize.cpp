@@ -6,10 +6,10 @@
 #include <sstream>
 using namespace std;
 
-void print_matrix(double matrix[3][24][24]) {
+void print_matrix(double matrix[3][26][26]) {
     for (int i = 0; i < 3; i++) {
-        for (int j = 0; j < 24; j++) {
-            for (int k = 0; k < 24; k++) {
+        for (int j = 0; j < 26; j++) {
+            for (int k = 0; k < 26; k++) {
                 cout << matrix[i][j][k] << " ";
             }
             cout << endl;
@@ -20,7 +20,7 @@ void print_matrix(double matrix[3][24][24]) {
 
 // ...
 
-void normalize(string image_in,double img_out[3][24][24]){
+void normalize(string image_in,double img_out[3][26][26]){
     // Open pic.ppm file in read mode
     ifstream file(image_in);
 
@@ -49,8 +49,7 @@ void normalize(string image_in,double img_out[3][24][24]){
             matrix[0][i-3][j/3]= stof(tmp[j]);
             matrix[1][i-3][j/3]= stof(tmp[j+1]);
             matrix[2][i-3][j/3]= stof(tmp[j+2]);
-            //cout<<tmp[95]<<endl;
-            if(i==3) cout <<matrix[0][0][0]<< endl;
+            
         }
         
         
@@ -71,10 +70,10 @@ void normalize(string image_in,double img_out[3][24][24]){
 
     // Create a new matrix with the rows 4 to 27
     
-    int img_i = 0;
-    int img_j = 0;
+    int img_i = 1;
+    int img_j = 1;
     for (int i = 4; i < 28; i++) {
-        img_j = 0;
+        img_j = 1;
         for (int j = 4; j < 28; j++) {
             img_out[0][img_i][img_j] = matrix[0][i][j];
             img_out[1][img_i][img_j] = matrix[1][i][j];
@@ -82,6 +81,18 @@ void normalize(string image_in,double img_out[3][24][24]){
             img_j++;
         }
         img_i++;
+    }
+    //padding the img
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < 26; j++)
+        {
+            img_out[i][0][j]=0;
+            img_out[i][j][0]=0;
+            img_out[i][25][j]=0;
+            img_out[i][j][25]=0;
+        }
+        
     }
     print_matrix(img_out);
     // Normalize the values in the img matrix
@@ -91,14 +102,14 @@ void normalize(string image_in,double img_out[3][24][24]){
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 24; j++) {
             for (int k = 0; k < 24; k++) {
-                mu += img_out[i][j][k] / N;
+                mu += img_out[i][j+1][k+1] / N;
             }
         }
     }
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 24; j++) {
             for (int k = 0; k < 24; k++) {
-                sigma += (img_out[i][j][k] - mu) * (img_out[i][j][k] - mu);
+                sigma += (img_out[i][j+1][k+1] - mu) * (img_out[i][j+1][k+1] - mu);
             }
         }
     }
@@ -107,16 +118,18 @@ void normalize(string image_in,double img_out[3][24][24]){
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 24; j++) {
             for (int k = 0; k < 24; k++) {
-                img_out[i][j][k] = (img_out[i][j][k] - mu) / max(sigma, 1 / sqrt(N));
+                img_out[i][j+1][k+1] = (img_out[i][j+1][k+1] - mu) / max(sigma, 1 / sqrt(N));
             }
         }
     }
+ 
+    
 
 // Write img_out to img_out.txt file
 ofstream f1("img_out.txt");
 for (int i = 0; i < 3; i++) {
-    for (int j = 0; j < 24; j++) {
-        for (int k = 0; k < 24; k++) {
+    for (int j = 0; j < 26; j++) {
+        for (int k = 0; k < 26; k++) {
             f1 << img_out[i][j][k] << " ";
             }
         f1 << endl;
@@ -126,7 +139,8 @@ for (int i = 0; i < 3; i++) {
 f1.close();
 }
 int main(){
-    double img_out[3][24][24];
-    normalize("../img/img_3.ppm",img_out);
+    double img_out[3][26][26];
+    normalize("../../img/img_1.ppm",img_out);
+    print_matrix(img_out);
     return 0;
 }

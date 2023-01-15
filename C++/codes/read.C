@@ -11,7 +11,7 @@ int main()
         scanf("%d",&k[l]);
     }
     for(int y=0;y<10;y++){
-    FILE *f = fopen("../test_batch.bin", "rb");
+    FILE *f = fopen("../../test_batch.bin", "rb");
     int val;
     int label;
     unsigned char r[1024], g[1024], b[1024];
@@ -36,7 +36,7 @@ int main()
     
     fclose(f);
     char file[14];
-    sprintf(file,"../img/img_%d.ppm",y+1);
+    sprintf(file,"../../img/img_%d.ppm",y+1);
     FILE *f1 = fopen(file, "w");
     fprintf(f1, "P3\n");
     fprintf(f1, "32 32\n");
