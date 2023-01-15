@@ -1,6 +1,13 @@
-
+#include <cstring>
+#include <fstream>
+#include <iostream>
+#include <cmath>
+#include <string>
+#include <sstream>
 #include"../include/KERNEL.hpp"
-
+#include"normalize.cpp"
+#include"../include/MaxPool.hpp"
+#include"../include/reshape.hpp"
 using namespace std;
 
 void convo1(
@@ -21,8 +28,10 @@ void convo1(
             }
           }
         }
+        cout<<res<<endl;
         if (res < 0) res = 0;
         image_out[c][i][j] = res;
+        
       }
     }
   }
@@ -75,4 +84,39 @@ void convo3(
     }
   }
 }
-
+void print_matrix1(double matrix[64][24][24]) {
+    for (int i = 0; i < 64; i++) {
+        for (int j = 0; j < 24; j++) {
+            for (int k = 0; k < 24; k++) {
+                cout << matrix[i][j][k] << " ";
+            }
+            cout << endl;
+        }
+        cout << endl;
+    }
+}
+int main(){
+    
+    double img_0[3][26][26];
+    double img_10[64][24][24];
+    double img_1[64][14][14];
+    double img_20[32][12][12];
+    double img_2[32][8][8];
+    double img_30[20][6][6];
+    double img_3[20][3][3];
+    double out[180];
+    normalize("../../img/img_3.ppm",img_0);
+    convo1(img_0,kernel_1,bais_1,img_10);
+    maxpool_1(img_10,img_1);
+    convo2(img_1,kernel_2,bais_2,img_20);
+    maxpool_2(img_20,img_2);
+    convo3(img_2,kernel_3,bais_3,img_30);
+    maxpool_3(img_30,img_3);
+    reshape(img_3,out);
+    for (int i = 0; i < 180; i++)
+    {
+      cout<<out[i]<<endl;
+    }
+    
+    return 0;
+}

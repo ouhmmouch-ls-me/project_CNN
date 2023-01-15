@@ -94,7 +94,7 @@ void normalize(string image_in,double img_out[3][26][26]){
         }
         
     }
-    print_matrix(img_out);
+    //print_matrix(img_out);
     // Normalize the values in the img matrix
     int N = 24 * 24 * 3;
     double mu = 0;
@@ -137,10 +137,4 @@ for (int i = 0; i < 3; i++) {
     f1 << endl;
 }
 f1.close();
-}
-int main(){
-    double img_out[3][26][26];
-    normalize("../../img/img_1.ppm",img_out);
-    print_matrix(img_out);
-    return 0;
 }
