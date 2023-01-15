@@ -1,30 +1,15 @@
+#include <cstring>
 #include <fstream>
 #include <iostream>
 #include <cmath>
-#include <vector>
 #include <string>
 #include <sstream>
-
 using namespace std;
 
-// Converts a string to an integer
-double str_to_double(string str) {
-    stringstream ss(str);
-    double result;
-    ss >> result;
-    return result;
-}
-
-// Converts a list of strings to a list of integers
-void str_list_to_double(vector<string> &list1,vector<double> &list) {
-    for (int i = 0; i < list1.size(); i++) {
-        list.push_back(str_to_double(list1[i]));
-    }
-}
-void print_matrix(vector<vector<vector<double>>> matrix) {
-    for (int i = 0; i < matrix.size(); i++) {
-        for (int j = 0; j < matrix[i].size(); j++) {
-            for (int k = 0; k < matrix[i][j].size(); k++) {
+void print_matrix(double matrix[3][24][24]) {
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 24; j++) {
+            for (int k = 0; k < 24; k++) {
                 cout << matrix[i][j][k] << " ";
             }
             cout << endl;
@@ -35,56 +20,47 @@ void print_matrix(vector<vector<vector<double>>> matrix) {
 
 // ...
 
-
-
-
-int main() {
+void normalize(string image_in,double img_out[3][24][24]){
     // Open pic.ppm file in read mode
-    ifstream file("../img/img_1.ppm");
+    ifstream file(image_in);
 
     // Read in all lines from the file
-    vector<string> lines;
+    string lines[35];
     string line;
+    int lines_i = 0;
     while (getline(file, line)) {
-        lines.push_back(line);
+        lines[lines_i] = line;
+        lines_i++;
     }
     file.close();
 
-    // Convert lines to a matrix of integers
-    vector<vector<vector<double>>> matrix;
-    for (int i = 3; i < lines.size(); i++) {
-        vector<vector<double>> ligne;
-        vector<string> raw1;
-        vector<double> raw;
-        vector<double> pixel;
-        stringstream ss(lines[i]);
+    // Convert lines to a matrix of doubles
+    double matrix[3][32][32];
+    for (int i = 3; i < lines_i; i++) {
         string token;
-        while (getline(ss, token, ' ')) {
-            raw1.push_back(token);
+        string tmp[96];
+        int pt = 0;
+        stringstream ss(lines[i]);
+        while (ss >> token) {
+            tmp[pt] = token;
+            pt++;
         }
-        str_list_to_double(raw1,raw);
-        for (int j = 0; j < raw.size(); j++) {
-            if (j % 3 == 0) {
-                pixel.push_back(raw[j]);
-            }
-            if (j % 3 == 1) {
-                pixel.push_back(raw[j]);
-            }
-            if (j % 3 == 2) {
-                pixel.push_back(raw[j]);
-                ligne.push_back(pixel);
-                pixel.clear();
-            }
+        for (int j=0; j < 96; j+=3){
+            matrix[0][i-3][j/3]= stof(tmp[j]);
+            matrix[1][i-3][j/3]= stof(tmp[j+1]);
+            matrix[2][i-3][j/3]= stof(tmp[j+2]);
+            //cout<<tmp[95]<<endl;
+            if(i==3) cout <<matrix[0][0][0]<< endl;
         }
-        matrix.push_back(ligne);
-        cout << matrix.size() << endl;
+        
+        
     }
-
+    //cout << matrix[0][0][0]<< endl;
     // Write matrix to matrix.txt file
     ofstream f("matrix.txt");
-    for (int i = 0; i < matrix.size(); i++) {
-        for (int j = 0; j < matrix[i].size(); j++) {
-            for (int k = 0; k < matrix[i][j].size(); k++) {
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 32; j++) {
+            for (int k = 0; k < 32; k++) {
                 f << matrix[i][j][k] << " ";
             }
             f << endl;
@@ -94,56 +70,63 @@ int main() {
     f.close();
 
     // Create a new matrix with the rows 4 to 27
-    vector<vector<vector<double>>> img;
+    
+    int img_i = 0;
+    int img_j = 0;
     for (int i = 4; i < 28; i++) {
-        vector<vector<double>> row;
+        img_j = 0;
         for (int j = 4; j < 28; j++) {
-            row.push_back(matrix[i][j]);
+            img_out[0][img_i][img_j] = matrix[0][i][j];
+            img_out[1][img_i][img_j] = matrix[1][i][j];
+            img_out[2][img_i][img_j] = matrix[2][i][j];
+            img_j++;
         }
-        img.push_back(row);
+        img_i++;
     }
-
+    print_matrix(img_out);
     // Normalize the values in the img matrix
     int N = 24 * 24 * 3;
     double mu = 0;
     double sigma = 0;
-    for (int i = 0; i < img.size(); i++) {
-    for (int j = 0; j < img[i].size(); j++) {
-        for (int k = 0; k < img[i][j].size(); k++) {
-            mu += img[i][j][k] / N;
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 24; j++) {
+            for (int k = 0; k < 24; k++) {
+                mu += img_out[i][j][k] / N;
+            }
         }
     }
-}
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 24; j++) {
+            for (int k = 0; k < 24; k++) {
+                sigma += (img_out[i][j][k] - mu) * (img_out[i][j][k] - mu);
+            }
+        }
+    }
+    sigma = sqrt(sigma / N);
 
-for (int i = 0; i < img.size(); i++) {
-    for (int j = 0; j < img[i].size(); j++) {
-        for (int k = 0; k < img[i][j].size(); k++) {
-            sigma += (img[i][j][k] - mu) * (img[i][j][k] - mu);
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 24; j++) {
+            for (int k = 0; k < 24; k++) {
+                img_out[i][j][k] = (img_out[i][j][k] - mu) / max(sigma, 1 / sqrt(N));
+            }
         }
     }
-}
-sigma = sqrt(sigma / N);
 
-for (int i = 0; i < img.size(); i++) {
-    for (int j = 0; j < img[i].size(); j++) {
-        for (int k = 0; k < img[i][j].size(); k++) {
-            img[i][j][k] = (img[i][j][k] - mu) / max(sigma, 1 / sqrt(N));
-        }
-    }
-}
-print_matrix(img);
-// Write img to img.txt file
-ofstream f1("img.txt");
-for (int i = 0; i < img.size(); i++) {
-    for (int j = 0; j < img[i].size(); j++) {
-        for (int k = 0; k < img[i][j].size(); k++) {
-            f1 << img[i][j][k] << " ";
+// Write img_out to img_out.txt file
+ofstream f1("img_out.txt");
+for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 24; j++) {
+        for (int k = 0; k < 24; k++) {
+            f1 << img_out[i][j][k] << " ";
             }
         f1 << endl;
     }
     f1 << endl;
 }
 f1.close();
-return 0;
-
+}
+int main(){
+    double img_out[3][24][24];
+    normalize("../img/img_3.ppm",img_out);
+    return 0;
 }

@@ -31,7 +31,7 @@ def write_image_ppm(image_data, output_file):
                 n=0
     f.close()
 pic="pic.ppm"
-write_image_ppm(read_img(f,1000),pic)
+write_image_ppm(read_img(f,4),pic)
 
 #Read the image file 
 img = mpimg.imread(pic)
