@@ -28,7 +28,6 @@ void convo1(
             }
           }
         }
-        cout<<res<<endl;
         if (res < 0) res = 0;
         image_out[c][i][j] = res;
         

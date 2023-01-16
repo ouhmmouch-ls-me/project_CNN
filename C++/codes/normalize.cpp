@@ -138,3 +138,8 @@ for (int i = 0; i < 3; i++) {
 }
 f1.close();
 }
+int main(){
+    double img[3][26][26];
+    normalize("../../img/img_1.ppm",img);
+    print_matrix(img);
+}
